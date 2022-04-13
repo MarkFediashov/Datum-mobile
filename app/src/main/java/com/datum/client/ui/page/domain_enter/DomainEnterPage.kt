@@ -17,6 +17,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.ui.Page
+import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.page.login.LoginPage
 import com.datum.client.ui.page.login.LoginPageNavHelper
 import kotlinx.coroutines.CoroutineScope
@@ -54,11 +55,13 @@ class DomainEnterPage(navController: NavController, stackEntry: NavBackStackEntr
 
     private fun onButtonClick(domain: String, context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
-            val data = BusinessLogicService.instance.checkDomain(domain)
-            withContext(Dispatchers.Main){
-                val message = if (data) "Server exist" else "Server non exist"
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                navController.navigate(LoginPageNavHelper().substituteArgument())
+            ProgressIndicator.blockOperation {
+                val data = BusinessLogicService.instance.checkDomain(domain)
+                withContext(Dispatchers.Main) {
+                    val message = if (data) "Server exist" else "Server non exist"
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    navController.navigate(LoginPageNavHelper().substituteArgument())
+                }
             }
         }
     }

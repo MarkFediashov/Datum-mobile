@@ -49,7 +49,7 @@ class DatumApiServiceImpl : DatumApiService {
     }
 
     override suspend fun getDatasetMetadata(): DatasetDto {
-        TODO("Not yet implemented")
+        return DatasetDto("Test dataset", "Test dataset for ...", trainPercent = 0.4, testPercent = 0.4, validationPercent = 0.2)
     }
 
     override suspend fun setDatasetMetadata(datasetMetadata: DatasetDto) {

@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.service.Role
+import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.theme.DatumTheme
 import kotlinx.coroutines.runBlocking
 import com.datum.client.ui.page.*
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity() {
     fun App(){
         val startPath = defineStartPath()
         navController = rememberNavController()
+        ProgressIndicator.Build()
         NavHost(navController = navController, startDestination = startPath){
             composable(DomainEnterNavHelper().substituteArgument()){
                 DomainEnterPage(navController, it).BuildContent()
@@ -110,16 +112,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    DatumTheme {
-        Greeting("Android")
-    }
-}
+/**
+        test user:
+            Login: 1
+            Password: o<@K4Lxs03
+ **/
