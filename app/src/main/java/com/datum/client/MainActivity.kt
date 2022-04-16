@@ -21,6 +21,8 @@ import kotlinx.coroutines.runBlocking
 import com.datum.client.ui.page.*
 import com.datum.client.ui.page.dataset_control.DatasetControlNavHelper
 import com.datum.client.ui.page.dataset_control.DatasetControlPage
+import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
+import com.datum.client.ui.page.dataset_meta.DatasetMetaPage
 import com.datum.client.ui.page.domain_enter.DomainEnterNavHelper
 import com.datum.client.ui.page.domain_enter.DomainEnterPage
 import com.datum.client.ui.page.login.LoginPage
@@ -109,11 +111,16 @@ class MainActivity : ComponentActivity() {
             composable(datasetControl.templateUrl(), arguments = datasetControl.getNavArguments()){
                 DatasetControlPage(navController, it).BuildContent()
             }
+
+            val datasetMeta  = DatasetMetaNavHelper()
+            composable(datasetMeta.templateUrl(), arguments = datasetMeta.getNavArguments()){
+                DatasetMetaPage(navController, it).BuildContent()
+            }
         }
     }
 }
 /**
         test user:
             Login: 1
-            Password: o<@K4Lxs03
+            Password: o<@K4Lxs03@
  **/

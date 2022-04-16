@@ -22,7 +22,7 @@ class DatasetMetaNavHelper: NavHelper() {
     }
 
     override fun substituteArgument(vararg arr: Any): String {
-        val datasetId = arr[0] as Int
+        val datasetId = ArgumentRepository.putArgument(arr[0])
         return "dataset/${datasetId}"
     }
 
