@@ -24,6 +24,7 @@ import androidx.navigation.*
 import com.datum.client.dto.DatasetImageClass
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.ui.Page
+import com.datum.client.ui.custom.ComplexDropdownMenu
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,36 +49,13 @@ class SendForm(n: NavController, b: NavBackStackEntry): Page(n, b) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Image(bitmap = image.asImageBitmap(), modifier = Modifier.weight(3.5f).padding(30.dp), contentDescription = "", contentScale = ContentScale.FillWidth)
             Box(Modifier.weight(1f)){
-                DropdownMenu(selected, options)
+                ComplexDropdownMenu(selected, options)
             }
             Button(onClick = { sendData(image, selected.value, context) }) {
                 Text("Send")
             }
         }
 
-    }
-
-    @ExperimentalMaterialApi
-    @Composable
-    fun DropdownMenu(selectedClass: MutableState<DatasetImageClass>, options: List<DatasetImageClass>){
-
-        val expanded = remember { mutableStateOf(false) }
-
-        ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = {
-            expanded.value = it
-        }) {
-            TextField(value = selectedClass.value.name, readOnly = true, onValueChange = { })
-            ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false}) {
-                options.forEach {
-                    DropdownMenuItem(onClick = {
-                        selectedClass.value = it
-                        expanded.value = false
-                    }) {
-                        Text(it.name)
-                    }
-                }
-            }
-        }
     }
 
     fun sendData(image: Bitmap, imageClass: DatasetImageClass, context: Context) {

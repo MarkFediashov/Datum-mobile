@@ -37,24 +37,33 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     @Composable
     @ExperimentalMaterialApi
     override fun BuildContent() {
+
         val argument = UserListNavHelper().getList(backStackEntry)
         val scrollState = rememberLazyListState()
-        val state = remember {  mutableStateOf(false) }
+        val showDeleteDialogState = remember { mutableStateOf(false) }
+        val showAddUserDialogState = remember { mutableStateOf(false) }
         val deleteUserRef = remember { mutableStateOf(argument.first()) }
 
         Scaffold(
-            floatingActionButton = { AddUserFloating() }){
+            floatingActionButton = {
+                AddUserFloating(showAddUserDialogState)
+            }){
             LazyColumn(state = scrollState, modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 10.dp)) {
                 items(argument){
-                    if(state.value) {
-                        DeleteUserDialog(deleteUserRef.value, state)
+                    if(showDeleteDialogState.value) {
+                        DeleteUserDialog(deleteUserRef.value, showDeleteDialogState)
                     }
-                    UserRow(it){
-                        state.value = true
+                    if(showAddUserDialogState.value){
+                        AddUserDialog(showAddUserDialogState)
+                    }
+
+                    UserRow(it) {
+                        showDeleteDialogState.value = true
                         deleteUserRef.value = it
                     }
+
                     if(argument.last() != it){
                         Separator(color = Color.Gray)
                     }
@@ -64,9 +73,9 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     }
 
     @Composable
-    private fun AddUserFloating(){
+    private fun AddUserFloating(show: MutableState<Boolean>){
         FloatingActionButton(onClick = {
-            Logger.getGlobal().log(Level.WARNING, "hello")
+            show.value = true
         }) {
             Icon(painter = rememberVectorPainter(Icons.Default.Add), "Add User")
         }
@@ -92,8 +101,22 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
                     Text(user.name, fontSize = 20.sp)
                     Text(user.createdStr)
                 }
-                Text(Role.nameOfRole(user.roleId), fontSize = 20.sp)
+                Text(Role.by(user.roleId).name, fontSize = 20.sp)
             }
+        }
+    }
+
+    @Composable
+    private fun AlertDialogButtons(onOk: () -> Unit, onCancel: () -> Unit){
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = onOk) {
+                Text("OK")
+            }
+            Box(Modifier.width(20.dp))
+            Button(onClick = onCancel) {
+                Text("Cancel")
+            }
+            Box(Modifier.width(10.dp))
         }
     }
 
@@ -101,28 +124,38 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     private fun DeleteUserDialog(user: UserDto, showAlert: MutableState<Boolean>){
         AlertDialog(onDismissRequest = { },
             title = { Text("Warning")},
-            text = { Text ("Delete ${user.name}? This user cannot upload images!") },
+            text = { Text ("Delete ${user.name}? This user will cannot upload images!") },
             buttons = {
-                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    Button(onClick = {
-                        showAlert.value = false
-                    }) {
-                        Text("OK")
-                    }
-                    Box(Modifier.width(20.dp))
-                    Button(onClick = {
-                        showAlert.value = false
-                    }) {
-                        Text("Cancel")
-                    }
-                    Box(Modifier.width(10.dp))
-                }
+                AlertDialogButtons(
+                    onOk = { showAlert.value = false },
+                    onCancel = { showAlert.value = false }
+                )
             }, properties = DialogProperties())
     }
 
     @Composable
-    private fun AddUserDialog(){
+    private fun AddUserDialog(showAlert: MutableState<Boolean>){
+        val newUserName = remember { mutableStateOf ("")}
+        val newUserRole = remember { mutableStateOf ("user")}
+        val newUserEmail = remember { mutableStateOf("") }
 
+        val assign = { value: MutableState<String> -> { it: String -> value.value = it} }
+
+        AlertDialog(onDismissRequest = { showAlert.value = false },
+            title = { Text ("Add user") },
+            text = {
+                Column() {
+                    TextField(value = newUserName.value, onValueChange = assign(newUserName))
+                    TextField(value = newUserEmail.value, onValueChange = assign(newUserEmail))
+                }
+            },
+            buttons = {
+                AlertDialogButtons(onOk = { showAlert.value = false }) {
+                    showAlert.value = false
+                }
+            },
+            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+        )
     }
 
 }
