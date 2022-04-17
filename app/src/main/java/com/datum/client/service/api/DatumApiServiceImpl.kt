@@ -84,7 +84,12 @@ class DatumApiServiceImpl : DatumApiService {
     }
 
     override suspend fun getUserList(): List<UserDto> {
-        TODO("Not yet implemented")
+        return listOf(
+            UserDto("Mark", "11 apr 2022", 12, 2),
+            UserDto("Petr", "12 apr 2022", 13, 1),
+            UserDto("Till", "13 apr 2022", 14, 1),
+
+        )
     }
 
     override suspend fun deleteUser(id: Int): SuccessResultDto {

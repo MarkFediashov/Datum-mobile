@@ -32,8 +32,8 @@ import com.datum.client.ui.page.maintainer.MaintainerPageNavHelper
 import com.datum.client.ui.page.send_form.SendForm
 import com.datum.client.ui.page.send_form.SendFormNavHelper
 import com.datum.client.ui.page.user.UserPage
-import com.datum.client.ui.page.user_control.UserControlNavHelper
-import com.datum.client.ui.page.user_control.UserControlPage
+import com.datum.client.ui.page.user_list.UserListNavHelper
+import com.datum.client.ui.page.user_list.UserListPage
 
 
 class MainActivity : ComponentActivity() {
@@ -102,9 +102,9 @@ class MainActivity : ComponentActivity() {
                 SendForm(navController, it).BuildContent()
             }
 
-            val userControl = UserControlNavHelper()
-            composable(userControl.templateUrl(), arguments = userControl.getNavArguments()){
-                UserControlPage(navController, it).BuildContent()
+            val userList = UserListNavHelper()
+            composable(userList.templateUrl(), arguments = userList.getNavArguments()){
+                UserListPage(navController, it).BuildContent()
             }
 
             val datasetControl  = DatasetControlNavHelper()

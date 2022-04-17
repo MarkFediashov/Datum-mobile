@@ -10,12 +10,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.datum.client.service.BusinessLogicService
 import com.datum.client.ui.Page
 import com.datum.client.ui.custom.ManagementOption
+import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.custom.Separator
 import com.datum.client.ui.page.dataset_control.DatasetControlNavHelper
-import com.datum.client.ui.page.user_control.UserControlNavHelper
+import com.datum.client.ui.page.user_list.UserListNavHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     companion object {
@@ -25,11 +29,21 @@ class UserPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
+
+        val scope = rememberCoroutineScope()
+
         Column {
             val currentScope = rememberCoroutineScope()
             Text("Project control", fontSize = 24.sp)
             ManagementOption(optionString = "Manage users") {
-                navController.navigate(UserControlNavHelper().substituteArgument())
+                scope.launch {
+                    val data = withContext(Dispatchers.IO) {
+                        ProgressIndicator.blockOperation {
+                            BusinessLogicService.instance.getUserList()
+                        }
+                    }
+                    navController.navigate(UserListNavHelper().substituteArgument(data))
+                }
 
             }
             Separator(color = Color.Gray)
