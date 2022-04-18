@@ -84,19 +84,14 @@ class DatumApiServiceImpl : DatumApiService {
     }
 
     override suspend fun getUserList(): List<UserDto> {
-        return listOf(
-            UserDto("Mark", "11 apr 2022", 12, 2),
-            UserDto("Petr", "12 apr 2022", 13, 1),
-            UserDto("Till", "13 apr 2022", 14, 1),
-
-        )
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.User.LIST, HttpMethod.Get, "")
     }
 
     override suspend fun deleteUser(id: Int): SuccessResultDto {
-        TODO("Not yet implemented")
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.User.delete(id), HttpMethod.Post, "")
     }
 
     override suspend fun createUser(creationDto: UserCreationDto): UserInvitationDto {
-        TODO("Not yet implemented")
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.User.ADD, HttpMethod.Post, creationDto)
     }
 }

@@ -19,5 +19,5 @@ interface DatumApiService {
 
     suspend fun getUserList(): List<UserDto>
     suspend fun deleteUser(id: Int): SuccessResultDto
-    suspend fun createUser(creationDto: UserCreationDto): UserInvitationDto
+    suspend fun createUser(creationDto: UserCreationDto): UserInvitationDto?
 }

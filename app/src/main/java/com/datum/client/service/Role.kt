@@ -8,11 +8,14 @@ class Role private constructor(override val id: Int, override val name: String) 
 
         private val USER = Role(1, "user")
         private val MAINTAINER = Role(2, "maintainer")
+
         private val ROLE_MAP: Map<Int, Role> =
             Role::class.java.declaredFields
             .filter { java.lang.reflect.Modifier.isStatic(it.modifiers) && it.type.equals(Role::class.java) }
             .map { it.get(null) as Role }
             .associateBy { it.id }
+
+        val ROLES = ROLE_MAP.values.toList()
 
         fun isUser(role: String) = role == USER.name
 

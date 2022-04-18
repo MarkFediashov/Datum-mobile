@@ -1,10 +1,7 @@
 package com.datum.client.service
 
 import android.content.Context
-import com.datum.client.dto.DatasetImageClass
-import com.datum.client.dto.LoginCredentialsDto
-import com.datum.client.dto.RefreshTokenDto
-import com.datum.client.dto.TokenPairDto
+import com.datum.client.dto.*
 import com.datum.client.repository.SettingsRepository
 import com.datum.client.repository.SettingsRepositoryImpl
 import com.datum.client.service.api.DatumApiService
@@ -85,5 +82,8 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
     suspend fun getDatasetMeta() = apiService.getDatasetMetadata()
 
     suspend fun getUserList() = apiService.getUserList()
+
+    suspend fun addUser(user: UserCreationDto): UserInvitationDto? = apiService.createUser(user)
+    suspend fun deleteUser(userId: Int): Boolean = apiService.deleteUser(userId).success
 }
 
