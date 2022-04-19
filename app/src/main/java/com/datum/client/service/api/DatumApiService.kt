@@ -13,7 +13,7 @@ interface DatumApiService {
 
     suspend fun getDatasetMetadata(): DatasetDto
     suspend fun setDatasetMetadata(datasetMetadata: DatasetDto)
-    suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto
+    suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto?
     suspend fun getAllSamples(): List<DataSampleDto>
     suspend fun getImageClasses(): List<DatasetImageClass>
 

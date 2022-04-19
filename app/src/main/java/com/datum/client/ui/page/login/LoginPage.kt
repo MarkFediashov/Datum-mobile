@@ -19,9 +19,8 @@ import androidx.navigation.NavController
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.service.Role
 import com.datum.client.ui.Page
-import com.datum.client.ui.page.maintainer.MaintainerPage
 import com.datum.client.ui.page.maintainer.MaintainerPageNavHelper
-import com.datum.client.ui.page.user.UserPage
+import com.datum.client.ui.page.user.UserPageNavHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,7 +60,7 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
                 if(result) {
                     val role = BusinessLogicService.instance.getUserRole()
                     if (Role.isUser(role)) {
-                        navController.navigate(UserPage.PATH)
+                        navController.navigate(UserPageNavHelper().substituteArgument())
                     } else {
                         navController.navigate(MaintainerPageNavHelper().substituteArgument())
                     }

@@ -9,11 +9,13 @@ class MaintainerPageNavHelper: NavHelper() {
         return listOf()
     }
 
-    override fun templateUrl(): String = "maintainer"
-
-    override fun substituteArgument(vararg arr: Any): String = templateUrl()
-
-    override fun typeOf(): KClass<*> {
-        TODO("Not yet implemented")
+    override fun templateUrl(): String {
+        return "user-page"
     }
+
+    override fun substituteArgument(vararg arr: Any): String {
+        return templateUrl()
+    }
+
+    override fun typeOf(): KClass<*> = MaintainerPage::class
 }

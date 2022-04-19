@@ -34,10 +34,6 @@ import java.io.ByteArrayOutputStream
 
 class SendForm(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
-    companion object{
-        val PATH = "send-form"
-    }
-
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
@@ -58,13 +54,13 @@ class SendForm(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
     }
 
-    fun sendData(image: Bitmap, imageClass: DatasetImageClass, context: Context) {
+    private fun sendData(image: Bitmap, imageClass: DatasetImageClass, context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             val stream = ByteArrayOutputStream(image.byteCount)
             image.compress(Bitmap.CompressFormat.JPEG, 20, stream)
             val result = BusinessLogicService.instance.uploadImage(imageClass.id, stream.toByteArray())
-            print(result.success)
-            val message = if(result.success) "Success" else "Bad"
+            print(result)
+            val message = if(result) "Success" else "Bad"
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 navController.popBackStack()

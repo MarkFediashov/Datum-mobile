@@ -49,11 +49,15 @@ import java.util.logging.Logger
 
 class UserListPage(navController: NavController, backStackEntry: NavBackStackEntry): Page(navController, backStackEntry) {
 
+    private val newData: MutableState<List<UserDto>?> = mutableStateOf(null)
+
+    private fun getCurrentUserList(): List<UserDto> {
+        return newData.value ?: UserListNavHelper().getList(backStackEntry)
+    }
     @Composable
     @ExperimentalMaterialApi
     override fun BuildContent() {
-
-        val argument = UserListNavHelper().getList(backStackEntry)
+        val argument = getCurrentUserList()
         val scrollState = rememberLazyListState()
         val showDeleteDialogState = remember { mutableStateOf(false) }
         val showAddUserDialogState = remember { mutableStateOf(false) }
@@ -70,7 +74,7 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
                 .padding(horizontal = 10.dp)) {
                 items(argument){
                     if(showDeleteDialogState.value) {
-                        DeleteUserDialog(deleteUserRef.value, showDeleteDialogState)
+                        DeleteUserDialog(deleteUserRef.value, showDeleteDialogState, scope)
                     }
                     if(showAddUserDialogState.value){
                         AddUserDialog(showAddUserDialogState) {
@@ -142,8 +146,7 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     }
 
     @Composable
-    private fun DeleteUserDialog(user: UserDto, showAlert: MutableState<Boolean>){
-        val scope = rememberCoroutineScope()
+    private fun DeleteUserDialog(user: UserDto, showAlert: MutableState<Boolean>, scope: CoroutineScope){
         AlertDialog(onDismissRequest = { },
             title = { Text("Warning")},
             text = { Text ("Delete ${user.name}? This user will cannot upload images!") },
@@ -152,15 +155,14 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
                     onOk = {
                         scope.launch {
                             withContext(Dispatchers.IO) {
-                                ProgressIndicator.blockOperation {
-                                    BusinessLogicService.instance.deleteUser(user.id)
-                                }
                                 withContext(Dispatchers.Main){
                                     showAlert.value = false
                                 }
+                                ProgressIndicator.blockOperation {
+                                    newData.value = BusinessLogicService.instance.deleteUser(user.id)
+                                }
                             }
                         }
-
                     },
                     onCancel = { showAlert.value = false }
                 )
@@ -171,12 +173,10 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     @Composable
     private fun AddUserDialog(showAlert: MutableState<Boolean>, onUserAdd: (UserCreationDto) -> Unit){
         val newUserName = remember { mutableStateOf ("")}
-        val newUserRole = remember { mutableStateOf ("user")}
+        val currentRole = remember { mutableStateOf(Role.ROLES.last())}
         val newUserEmail = remember { mutableStateOf("") }
 
         val assign = { value: MutableState<String> -> { it: String -> value.value = it} }
-
-        val currentRole = remember { mutableStateOf(Role.ROLES.last())}
 
         AlertDialog(onDismissRequest = { showAlert.value = false },
             title = { Text ("Add user") },
@@ -204,7 +204,10 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
 
     private suspend fun onUserCreate(userCreationDto: UserCreationDto, context: Context){
         withContext(Dispatchers.IO) {
-            val result = when (ProgressIndicator.blockOperation {  BusinessLogicService.instance.addUser(userCreationDto) }!= null) {
+            val result = when (ProgressIndicator.blockOperation {
+                newData.value = BusinessLogicService.instance.addUser(userCreationDto)
+                newData.value
+            }!= null) {
                 true -> "User created"
                 false -> "Bad"
             }

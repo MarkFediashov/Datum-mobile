@@ -9,13 +9,11 @@ class UserPageNavHelper: NavHelper() {
         return listOf()
     }
 
-    override fun templateUrl(): String {
-        return "user-page"
-    }
+    override fun templateUrl(): String = "user"
 
-    override fun substituteArgument(vararg arr: Any): String {
-        return templateUrl()
-    }
+    override fun substituteArgument(vararg arr: Any): String = templateUrl()
 
-    override fun typeOf(): KClass<*> = UserPage::class
+    override fun typeOf(): KClass<*> {
+        TODO("Not yet implemented")
+    }
 }

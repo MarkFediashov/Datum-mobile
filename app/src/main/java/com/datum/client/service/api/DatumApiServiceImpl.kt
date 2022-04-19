@@ -49,14 +49,14 @@ class DatumApiServiceImpl : DatumApiService {
     }
 
     override suspend fun getDatasetMetadata(): DatasetDto {
-        return DatasetDto("Test dataset", "Test dataset for ...", trainPercent = 0.4, testPercent = 0.4, validationPercent = 0.2)
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.GET_META, HttpMethod.Get, "")
     }
 
     override suspend fun setDatasetMetadata(datasetMetadata: DatasetDto) {
-        TODO("Not yet implemented")
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.POST_META, HttpMethod.Post, datasetMetadata)
     }
 
-    override suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto {
+    override suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto? {
         val parts = listOf(
             FormPart("ImageClassId", imageClassId),
             FormPart("Image", image, Headers.build {
@@ -64,9 +64,12 @@ class DatumApiServiceImpl : DatumApiService {
                 append(HttpHeaders.ContentDisposition, "filename=file.jpeg")
             })
         )
-        val data = networkClient.sendMultipart(ApiPath.Dataset.ADD_SAMPLE, parts)
-        Logger.getGlobal().log(Level.INFO, "123123123123 $data")
-        return Gson().fromJson(data, SuccessResultDto::class.java)
+        return try{
+            val data = networkClient.sendMultipart(ApiPath.Dataset.ADD_SAMPLE, parts)
+            Gson().fromJson(data, SuccessResultDto::class.java)
+        } catch(_: Exception){
+            null
+        }
     }
 
     override suspend fun getAllSamples(): List<DataSampleDto> {
@@ -91,7 +94,7 @@ class DatumApiServiceImpl : DatumApiService {
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.User.delete(id), HttpMethod.Post, "")
     }
 
-    override suspend fun createUser(creationDto: UserCreationDto): UserInvitationDto {
+    override suspend fun createUser(creationDto: UserCreationDto): UserInvitationDto? {
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.User.ADD, HttpMethod.Post, creationDto)
     }
 }

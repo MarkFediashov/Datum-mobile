@@ -6,9 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,7 +16,6 @@ import com.datum.client.service.Role
 import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.theme.DatumTheme
 import kotlinx.coroutines.runBlocking
-import com.datum.client.ui.page.*
 import com.datum.client.ui.page.dataset_control.DatasetControlNavHelper
 import com.datum.client.ui.page.dataset_control.DatasetControlPage
 import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
@@ -32,6 +29,7 @@ import com.datum.client.ui.page.maintainer.MaintainerPageNavHelper
 import com.datum.client.ui.page.send_form.SendForm
 import com.datum.client.ui.page.send_form.SendFormNavHelper
 import com.datum.client.ui.page.user.UserPage
+import com.datum.client.ui.page.user.UserPageNavHelper
 import com.datum.client.ui.page.user_list.UserListNavHelper
 import com.datum.client.ui.page.user_list.UserListPage
 
@@ -39,8 +37,6 @@ import com.datum.client.ui.page.user_list.UserListPage
 class MainActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
-
-
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +59,7 @@ class MainActivity : ComponentActivity() {
                  if(service.hasRefreshToken()){
                      if(service.restoreSession()){
                          val role = service.getUserRole()
-                         if(Role.isUser(role)) UserPage.PATH else MaintainerPageNavHelper().substituteArgument()
+                         if(Role.isUser(role)) UserPageNavHelper().substituteArgument() else MaintainerPageNavHelper().substituteArgument()
                      } else {
                          LoginPageNavHelper().substituteArgument()
                      }
@@ -86,14 +82,16 @@ class MainActivity : ComponentActivity() {
             composable(DomainEnterNavHelper().substituteArgument()){
                 DomainEnterPage(navController, it).BuildContent()
             }
+
             composable(LoginPageNavHelper().templateUrl()){
                 LoginPage(navController, it).BuildContent()
             }
-            composable(UserPage.PATH){
+
+            composable(UserPageNavHelper().templateUrl()){
                 UserPage(navController, it).BuildContent()
             }
-            val maintainerPageNavHelper = MaintainerPageNavHelper()
-            composable(maintainerPageNavHelper.templateUrl()){
+
+            composable(MaintainerPageNavHelper().templateUrl()){
                 MaintainerPage(navController, it).BuildContent()
             }
 

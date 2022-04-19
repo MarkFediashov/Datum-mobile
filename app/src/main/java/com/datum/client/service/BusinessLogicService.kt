@@ -77,13 +77,26 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
 
     fun getImageClasses() = imageClassesCache
 
-    suspend fun uploadImage(id: Int, image: ByteArray) = apiService.putSample(id, image)
+    suspend fun uploadImage(id: Int, image: ByteArray) = apiService.putSample(id, image)?.success ?: false
 
     suspend fun getDatasetMeta() = apiService.getDatasetMetadata()
 
     suspend fun getUserList() = apiService.getUserList()
 
-    suspend fun addUser(user: UserCreationDto): UserInvitationDto? = apiService.createUser(user)
-    suspend fun deleteUser(userId: Int): Boolean = apiService.deleteUser(userId).success
+    suspend fun addUser(user: UserCreationDto): List<UserDto>? {
+        return try {
+            if(apiService.createUser(user) != null) {
+                getUserList()
+            }
+            else null
+        } catch (_: Exception) {
+            return null
+        }
+    }
+    suspend fun deleteUser(userId: Int): List<UserDto>? {
+        return if(apiService.deleteUser(userId).success){
+            getUserList()
+        } else return null
+    }
 }
 
