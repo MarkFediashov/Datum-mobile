@@ -22,6 +22,8 @@ import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
 import com.datum.client.ui.page.dataset_meta.DatasetMetaPage
 import com.datum.client.ui.page.domain_enter.DomainEnterNavHelper
 import com.datum.client.ui.page.domain_enter.DomainEnterPage
+import com.datum.client.ui.page.image_classes.ImageClassNavHelper
+import com.datum.client.ui.page.image_classes.ImageClassPage
 import com.datum.client.ui.page.login.LoginPage
 import com.datum.client.ui.page.login.LoginPageNavHelper
 import com.datum.client.ui.page.maintainer.MaintainerPage
@@ -113,6 +115,11 @@ class MainActivity : ComponentActivity() {
             val datasetMeta  = DatasetMetaNavHelper()
             composable(datasetMeta.templateUrl(), arguments = datasetMeta.getNavArguments()){
                 DatasetMetaPage(navController, it).BuildContent()
+            }
+
+            val imageClass = ImageClassNavHelper()
+            composable(imageClass.templateUrl(), arguments = imageClass.getNavArguments()){
+                ImageClassPage(navController, it).BuildContent()
             }
         }
     }

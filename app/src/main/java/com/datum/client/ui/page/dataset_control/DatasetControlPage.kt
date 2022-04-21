@@ -9,12 +9,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.datum.client.dto.DatasetImageClassDto
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.ui.Page
 import com.datum.client.ui.custom.ManagementOption
+import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.custom.Separator
 import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
 import com.datum.client.ui.page.dataset_meta.DatasetMetaPage
+import com.datum.client.ui.page.image_classes.ImageClassNavHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -31,18 +34,21 @@ class DatasetControlPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             val scope = rememberCoroutineScope()
             ManagementOption(optionString = "Dataset meta") {
                 scope.launch {
-                    val data = withContext(Dispatchers.IO) {
-                        BusinessLogicService.instance.getDatasetMeta()
+
+                    val data = ProgressIndicator.blockOperation {
+                        withContext(Dispatchers.IO) {
+                            BusinessLogicService.instance.getDatasetMeta()
+                        }
                     }
                     navController.navigate(DatasetMetaNavHelper().substituteArgument(data))
                 }
 
             }
             Separator(color = Color.Gray)
-            ManagementOption(optionString = "Image classes") {
-                
+            /*ManagementOption(optionString = "Image classes") {
+                navController.navigate(ImageClassNavHelper().substituteArgument(listOf<DatasetImageClassDto>()))
             }
-            /*Separator(color = Color.Gray)
+            Separator(color = Color.Gray)
             ManagementOption(optionString = "View dataset") {
 
             }*/

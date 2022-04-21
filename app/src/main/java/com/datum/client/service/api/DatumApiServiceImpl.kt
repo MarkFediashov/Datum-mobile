@@ -49,7 +49,12 @@ class DatumApiServiceImpl : DatumApiService {
     }
 
     override suspend fun getDatasetMetadata(): DatasetDto<DatasetImageClass> {
-        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.GET_META, HttpMethod.Get, "")
+        return try {
+            networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.GET_META, HttpMethod.Get, "")
+        }
+        catch (_: Exception){
+            return DatasetDto(null, null, null, null,null, emptyList())
+        }
     }
 
     override suspend fun setDatasetMetadata(datasetMetadata: DatasetDto<DatasetImageClassDto>) {
@@ -59,6 +64,10 @@ class DatumApiServiceImpl : DatumApiService {
     override suspend fun updateDatasetMetadata(meta: DatasetDto<DatasetImageClassDto>) {
         assert(meta.imageClasses.isNullOrEmpty())
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.UPDATE_META, HttpMethod.Post, meta)
+    }
+
+    override suspend fun deleteMetadata() {
+        networkClient.sendAndGetResponseBodyOfType<Any>(ApiPath.Dataset.DELETE_META, HttpMethod.Post, "")
     }
 
     override suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto? {

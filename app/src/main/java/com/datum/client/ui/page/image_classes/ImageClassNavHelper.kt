@@ -1,8 +1,11 @@
 package com.datum.client.ui.page.image_classes
 
 import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.datum.client.dto.DatasetImageClassDto
+import com.datum.client.repository.ArgumentRepository
 import com.datum.client.ui.page.NavHelper
 import kotlin.reflect.KClass
 
@@ -14,8 +17,8 @@ class ImageClassNavHelper: NavHelper() {
         return listOf(
             navArgument(ID) {
                 type = NavType.IntType
-                nullable = true
-                defaultValue = null
+                nullable = false
+                defaultValue = -1
             }
         )
     }
@@ -25,11 +28,15 @@ class ImageClassNavHelper: NavHelper() {
     }
 
     override fun substituteArgument(vararg arr: Any): String {
-        val id = arr[0] as Int?
+        val id = ArgumentRepository.putArgument(arr[0] as List<DatasetImageClassDto>)
         return "image-classes?$ID=$id"
     }
 
     override fun typeOf(): KClass<*> {
         return ImageClassPage::class
+    }
+
+    fun getList(b: NavBackStackEntry): List<DatasetImageClassDto>? {
+        return ArgumentRepository.getArgument(getArg<Int>(b, ID) ?: -1)
     }
 }
