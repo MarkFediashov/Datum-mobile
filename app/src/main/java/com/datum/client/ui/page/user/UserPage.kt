@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import androidx.compose.material.ExperimentalMaterialApi
+import com.datum.client.ui.custom.ExitButton
 import com.datum.client.ui.page.send_form.SendFormNavHelper
 import java.nio.ByteBuffer
 
@@ -77,7 +78,14 @@ class UserPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
-        CameraPreview()
+        Box(Modifier.fillMaxSize()) {
+            CameraPreview()
+            Box(modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(end = 10.dp, bottom = 10.dp)){
+                ExitButton(navController)
+            }
+        }
     }
 
     @Composable

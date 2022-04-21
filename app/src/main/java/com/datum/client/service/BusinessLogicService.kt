@@ -98,5 +98,13 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
             getUserList()
         } else return null
     }
+
+    fun deletePersistentData(){
+        settingsRepository.apply {
+            credentials = null
+            endpoint = null
+            refreshToken = null
+        }
+    }
 }
 
