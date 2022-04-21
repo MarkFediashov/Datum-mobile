@@ -11,8 +11,9 @@ interface DatumApiService {
     suspend fun logout(): SuccessResultDto
     suspend fun checkDomain(domain: String): Boolean
 
-    suspend fun getDatasetMetadata(): DatasetDto
-    suspend fun setDatasetMetadata(datasetMetadata: DatasetDto)
+    suspend fun getDatasetMetadata(): DatasetDto<DatasetImageClass>
+    suspend fun setDatasetMetadata(datasetMetadata: DatasetDto<DatasetImageClassDto>)
+    suspend fun updateDatasetMetadata(meta: DatasetDto<DatasetImageClassDto>)
     suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto?
     suspend fun getAllSamples(): List<DataSampleDto>
     suspend fun getImageClasses(): List<DatasetImageClass>

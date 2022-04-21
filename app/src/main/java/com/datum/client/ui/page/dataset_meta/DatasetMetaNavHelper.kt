@@ -5,6 +5,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.datum.client.dto.DatasetDto
+import com.datum.client.dto.DatasetImageClass
 import com.datum.client.repository.ArgumentRepository
 import com.datum.client.ui.page.NavHelper
 import kotlin.reflect.KClass
@@ -30,7 +31,7 @@ class DatasetMetaNavHelper: NavHelper() {
         return DatasetMetaPage::class
     }
 
-    fun getDatasetMeta(b: NavBackStackEntry) : DatasetDto {
+    fun getDatasetMeta(b: NavBackStackEntry) : DatasetDto<DatasetImageClass> {
         val id = getArg<Int>(b, ID_ARG)
         return ArgumentRepository.getArgument(id!!)
     }

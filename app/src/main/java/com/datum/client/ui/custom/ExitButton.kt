@@ -14,41 +14,34 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.datum.client.service.BusinessLogicService
+import com.datum.client.types.AlertBinder
+import com.datum.client.types.createAlertState
+import com.datum.client.types.hide
+import com.datum.client.types.show
 import com.datum.client.ui.page.domain_enter.DomainEnterNavHelper
 
-private val exitState = mutableStateOf(false)
+private val exitState = createAlertState()
 
 @Composable
 fun ExitButton(navController: NavController){
     val state = remember { exitState }
-    if(state.value){
-        AlertDialog(
-            onDismissRequest = { exitState.value = false },
-            text = { Text("Do you want to logout? App storage will forget server and your credentials") },
-            title = { Text("Warning") },
-            buttons = {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-
-                    TextButton(onClick = {
-                        state.value = false
-                        navController.popBackStack()
-                        navController.navigate(DomainEnterNavHelper().substituteArgument())
-
-                        BusinessLogicService.instance.deletePersistentData()
-                    }) {
-                        Text("Ok")
-                    }
-                    TextButton(onClick = { state.value = false}) {
-                        Text("Cancel")
-                    }
-                    Box(Modifier.width(20.dp))
-                }
+    AlertBinder(state = state) {
+        ActionSubmitAlert(state = it, config = AlertConfiguration(
+            text = "Do you want to logout? App storage will forget server and your credentials",
+            title = "Warning",
+            onOk = {
+                //BusinessLogicService.instance.deletePersistentData()
+                navController.popBackStack()
+                navController.navigate(DomainEnterNavHelper().substituteArgument())
+                it.hide()
             },
-            properties = DialogProperties()
-        )
+            onCancel = {
+                it.hide()
+            }
+        ))
     }
     IconButton(onClick = {
-        state.value = true
+        state.show()
     }) {
         Icon(Icons.Default.ExitToApp, "Exit", tint = Color.LightGray)
     }

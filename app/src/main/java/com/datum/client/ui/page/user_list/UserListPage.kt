@@ -32,10 +32,12 @@ import com.datum.client.dto.UserCreationDto
 import com.datum.client.dto.UserDto
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.service.Role
+import com.datum.client.types.AlertBinder
+import com.datum.client.types.AlertState
+import com.datum.client.types.createAlertState
+import com.datum.client.types.hide
 import com.datum.client.ui.Page
-import com.datum.client.ui.custom.ComplexDropdownMenu
-import com.datum.client.ui.custom.ProgressIndicator
-import com.datum.client.ui.custom.Separator
+import com.datum.client.ui.custom.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,40 +61,42 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     override fun BuildContent() {
         val argument = getCurrentUserList()
         val scrollState = rememberLazyListState()
-        val showDeleteDialogState = remember { mutableStateOf(false) }
+        val showDeleteDialogState = remember { createAlertState() }
         val showAddUserDialogState = remember { mutableStateOf(false) }
         val deleteUserRef = remember { mutableStateOf(argument.first()) }
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
 
+        AlertBinder(state = showDeleteDialogState) {
+            DeleteUserDialog(user = deleteUserRef.value, showAlert = it, scope = scope)
+        }
+
         Scaffold(
             floatingActionButton = {
                 AddUserFloating(showAddUserDialogState)
             }){
-            LazyColumn(state = scrollState, modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp)) {
-                items(argument){
-                    if(showDeleteDialogState.value) {
-                        DeleteUserDialog(deleteUserRef.value, showDeleteDialogState, scope)
-                    }
-                    if(showAddUserDialogState.value){
-                        AddUserDialog(showAddUserDialogState) {
-                            scope.launch {
-                                onUserCreate(it, context)
+                LazyColumn(state = scrollState, modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp)) {
+                    items(argument){
+
+                        if(showAddUserDialogState.value){
+                            AddUserDialog(showAddUserDialogState) {
+                                scope.launch {
+                                    onUserCreate(it, context)
+                                }
                             }
                         }
-                    }
 
-                    UserRow(it) {
-                        showDeleteDialogState.value = true
-                        deleteUserRef.value = it
-                    }
+                        UserRow(it) {
+                            showDeleteDialogState.value = true
+                            deleteUserRef.value = it
+                        }
 
-                    if(argument.last() != it){
-                        Separator(color = Color.Gray)
+                        if(argument.last() != it){
+                            Separator(color = Color.Gray)
+                        }
                     }
-                }
             }
         }
     }
@@ -146,27 +150,26 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
     }
 
     @Composable
-    private fun DeleteUserDialog(user: UserDto, showAlert: MutableState<Boolean>, scope: CoroutineScope){
-        AlertDialog(onDismissRequest = { },
-            title = { Text("Warning")},
-            text = { Text ("Delete ${user.name}? This user will cannot upload images!") },
-            buttons = {
-                AlertDialogButtons(
-                    onOk = {
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                withContext(Dispatchers.Main){
-                                    showAlert.value = false
-                                }
-                                ProgressIndicator.blockOperation {
-                                    newData.value = BusinessLogicService.instance.deleteUser(user.id)
-                                }
-                            }
+    private fun DeleteUserDialog(user: UserDto, showAlert: AlertState, scope: CoroutineScope){
+        ActionSubmitAlert(state = showAlert, config = AlertConfiguration(
+            title = "Warning",
+            text = "Delete ${user.name}? This user will cannot upload images!",
+            onOk = {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        withContext(Dispatchers.Main){
+                            showAlert.hide()
                         }
-                    },
-                    onCancel = { showAlert.value = false }
-                )
-            }, properties = DialogProperties())
+                        ProgressIndicator.blockOperation {
+                            newData.value = BusinessLogicService.instance.deleteUser(user.id)
+                        }
+                    }
+                }
+            },
+            onCancel = {
+                showAlert.hide()
+            }
+        ))
     }
 
     @ExperimentalMaterialApi

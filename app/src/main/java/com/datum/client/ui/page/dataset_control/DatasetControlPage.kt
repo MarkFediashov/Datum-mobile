@@ -42,10 +42,10 @@ class DatasetControlPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             ManagementOption(optionString = "Image classes") {
                 
             }
-            Separator(color = Color.Gray)
+            /*Separator(color = Color.Gray)
             ManagementOption(optionString = "View dataset") {
 
-            }
+            }*/
             Separator(color = Color.Gray)
             ManagementOption(optionString = "Generate archive") {
 

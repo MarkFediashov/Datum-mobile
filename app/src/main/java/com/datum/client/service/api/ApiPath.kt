@@ -13,6 +13,8 @@ object ApiPath {
         val POST_META = "/api/dataset/meta"
         val ADD_SAMPLE = "/api/dataset/add-sample"
         val LIST_SAMPLE = "/api/dataset/samples"
+        val UPDATE_META = "/api/dataset/update-meta"
+        val DELETE_META = "/api/dataset/delete-meta"
     }
 
     object User {
