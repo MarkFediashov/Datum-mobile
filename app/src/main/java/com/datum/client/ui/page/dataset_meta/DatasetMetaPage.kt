@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -31,12 +30,18 @@ import kotlinx.coroutines.*
 
 class DatasetMetaPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
+    var cache = Any()
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
-        val data = DatasetMetaNavHelper().getDatasetMeta(backStackEntry)
+        val data = remember { DatasetMetaNavHelper().getDatasetMeta(backStackEntry) }
 
         BuildColumnView(data)
+    }
+
+    private fun getClasses(): List<DatasetImageClassDto> {
+        val classes = DatasetMetaNavHelper().getImageClasses(backStackEntry)
+        return classes ?: emptyList()
     }
 
     @Composable
@@ -58,7 +63,11 @@ class DatasetMetaPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             val validation = createState(dataset.validationPercentile?.toString())
             val name = createState(dataset.name)
             val description = createState(dataset.description)
-            val listOfImages = remember { mutableStateListOf<DatasetImageClassDto>()}
+            val listOfImages = remember {
+                dataset.datasetImageClasses.let {
+                    if(it.isEmpty()) getClasses() else it.map { c -> DatasetImageClassDto(c.name, c.description) }.toList()
+                }
+            }
         }
 
         val context = LocalContext.current
@@ -99,7 +108,17 @@ class DatasetMetaPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
                 }
 
             }
-            BuildButtons(scope = scope, deleteMeta, dataset.isFilled(), enabled = enabled)
+            BuildButtons(scope = scope, deleteMeta, dataset.isFilled(), enabled = enabled){
+                val valueOf = { x: MutableState<String?> -> x.value }
+                dtoState.let {
+                    DatasetDto(valueOf(it.name), valueOf(it.description),
+                        valueOf(it.train)?.toDoubleOrNull(),
+                        valueOf(it.validation)?.toDoubleOrNull(),
+                        valueOf(it.test)?.toDoubleOrNull(),
+                        it.listOfImages
+                    )
+                }
+            }
             Spacer(modifier = Modifier.weight(0.3f))
         }
     }
@@ -125,12 +144,20 @@ class DatasetMetaPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     }
 
     @Composable
-    private fun BuildButtons(scope: CoroutineScope, delete: AlertState, isFilled: Boolean, enabled: Boolean){
+    private fun BuildButtons(scope: CoroutineScope, delete: AlertState, isFilled: Boolean, enabled: Boolean, dtoBuilder: () -> DatasetDto<DatasetImageClassDto>){
+        val context = LocalContext.current
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Button(onClick = {
                 scope.launch {
                     withContext(Dispatchers.IO){
-
+                        ProgressIndicator.blockOperation {
+                            val dsMetadata = dtoBuilder()
+                            BusinessLogicService.instance.setMetadata(dsMetadata)
+                        }
+                        withContext(Dispatchers.Main){
+                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
+                        }
                     }
                 }
             }, enabled = enabled) {

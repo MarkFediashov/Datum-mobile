@@ -6,8 +6,6 @@ import com.datum.client.service.network.NetworkClient
 import com.google.gson.Gson
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import java.util.logging.Level
-import java.util.logging.Logger
 
 class DatumApiServiceImpl : DatumApiService {
     private val networkClient: NetworkClient = NetworkClient { BusinessLogicService.instance.actualTokenPair?.accessToken }
@@ -62,7 +60,7 @@ class DatumApiServiceImpl : DatumApiService {
     }
 
     override suspend fun updateDatasetMetadata(meta: DatasetDto<DatasetImageClassDto>) {
-        assert(meta.imageClasses.isNullOrEmpty())
+        assert(meta.datasetImageClasses.isNullOrEmpty())
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.UPDATE_META, HttpMethod.Post, meta)
     }
 
@@ -94,10 +92,7 @@ class DatumApiServiceImpl : DatumApiService {
      * Raw implementation: should send request on backend
      **/
     override suspend fun getImageClasses(): List<DatasetImageClass> {
-        return listOf(
-            DatasetImageClass(0, "class1", "test1"),
-            DatasetImageClass(1, "class2", "test2")
-        )
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.IMAGE_CLASSES, HttpMethod.Get, "")
     }
 
     override suspend fun getUserList(): List<UserDto> {

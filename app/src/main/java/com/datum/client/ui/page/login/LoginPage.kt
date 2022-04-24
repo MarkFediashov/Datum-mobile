@@ -10,14 +10,18 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.datum.client.DatasetNotInitializedException
+import com.datum.client.MainActivity
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.service.Role
+import com.datum.client.types.show
 import com.datum.client.ui.Page
 import com.datum.client.ui.page.maintainer.MaintainerPageNavHelper
 import com.datum.client.ui.page.user.UserPageNavHelper
@@ -35,6 +39,7 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
         val context = LocalContext.current
         val login = remember { mutableStateOf("") }
         val password = remember { mutableStateOf("") }
+        val scope = rememberCoroutineScope()
 
         Column(modifier = Modifier
             .fillMaxHeight()
@@ -44,26 +49,32 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             Box(Modifier.padding(top=20.dp))
             TextField(value = password.value, onValueChange = { password.value = it})
             Spacer(Modifier.weight(1f))
-            Button(onClick = { onClick(login.value, password.value, context) }) {
+            Button(onClick = { onClick(login.value, password.value, context, scope) }) {
                 Text("Login")
             }
             Box(Modifier.padding(top=30.dp))
         }
     }
 
-    private fun onClick(login: String, password: String, context: Context) {
+    private fun onClick(login: String, password: String, context: Context, scope: CoroutineScope) {
         CoroutineScope(Dispatchers.IO).launch {
-            val result = BusinessLogicService.instance.login(login, password)
-            withContext(Dispatchers.Main) {
-                val message = if (result) "Success" else "Bad"
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                if(result) {
-                    val role = BusinessLogicService.instance.getUserRole()
-                    if (Role.isUser(role)) {
-                        navController.navigate(UserPageNavHelper().substituteArgument())
-                    } else {
-                        navController.navigate(MaintainerPageNavHelper().substituteArgument())
+            try {
+                val result = BusinessLogicService.instance.login(login, password)
+                withContext(Dispatchers.Main) {
+                    val message = if (result) "Success" else "Bad"
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    if (result) {
+                        val role = BusinessLogicService.instance.getUserRole()
+                        if (Role.isUser(role)) {
+                            navController.navigate(UserPageNavHelper().substituteArgument())
+                        } else {
+                            navController.navigate(MaintainerPageNavHelper().substituteArgument())
+                        }
                     }
+                }
+            } catch (e: DatasetNotInitializedException) {
+                scope.launch {
+                    MainActivity.state.show()
                 }
             }
         }

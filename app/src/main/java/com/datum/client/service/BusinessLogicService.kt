@@ -1,6 +1,7 @@
 package com.datum.client.service
 
 import android.content.Context
+import com.datum.client.DatasetNotInitializedException
 import com.datum.client.dto.*
 import com.datum.client.repository.SettingsRepository
 import com.datum.client.repository.SettingsRepositoryImpl
@@ -47,11 +48,16 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
         val credentials = LoginCredentialsDto(login, password)
         return try {
             val tokenPair = apiService.login(credentials)
-            imageClassesCache = apiService.getImageClasses()
             actualTokenPair = tokenPair
             settingsRepository.credentials = credentials
             settingsRepository.refreshToken = RefreshTokenDto(tokenPair.refreshToken)
+            imageClassesCache = apiService.getImageClasses()
+            if(imageClassesCache.isEmpty() and Role.isUser(tokenPair.role)){
+                throw DatasetNotInitializedException()
+            }
             true
+        } catch (e: DatasetNotInitializedException){
+            throw e
         } catch (e: Exception) {
             false
         }
@@ -65,7 +71,12 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
                 settingsRepository.refreshToken = RefreshTokenDto(tokenPair.refreshToken)
                 actualTokenPair = tokenPair
                 imageClassesCache = apiService.getImageClasses()
+                if(imageClassesCache.isEmpty() and Role.isUser(tokenPair.role)){
+                    throw DatasetNotInitializedException()
+                }
                 true
+            } catch (e: DatasetNotInitializedException){
+                throw e
             } catch (e: Exception) {
                 settingsRepository.refreshToken = null
                 false
