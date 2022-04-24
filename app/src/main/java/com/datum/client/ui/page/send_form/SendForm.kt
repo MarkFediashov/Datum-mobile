@@ -25,6 +25,7 @@ import com.datum.client.dto.DatasetImageClass
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.ui.Page
 import com.datum.client.ui.custom.ComplexDropdownMenu
+import com.datum.client.ui.custom.ProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,14 +57,17 @@ class SendForm(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
     private fun sendData(image: Bitmap, imageClass: DatasetImageClass, context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
-            val stream = ByteArrayOutputStream(image.byteCount)
-            image.compress(Bitmap.CompressFormat.JPEG, 20, stream)
-            val result = BusinessLogicService.instance.uploadImage(imageClass.id, stream.toByteArray())
-            print(result)
-            val message = if(result) "Success" else "Bad"
-            withContext(Dispatchers.Main) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                navController.popBackStack()
+            ProgressIndicator.blockOperation {
+                val stream = ByteArrayOutputStream(image.byteCount)
+                image.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+                val result =
+                    BusinessLogicService.instance.uploadImage(imageClass.id, stream.toByteArray())
+                print(result)
+                val message = if (result) "Success" else "Bad"
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
             }
         }
     }

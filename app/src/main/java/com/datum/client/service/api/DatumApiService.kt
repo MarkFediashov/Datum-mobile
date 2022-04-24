@@ -18,6 +18,7 @@ interface DatumApiService {
     suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto?
     suspend fun getAllSamples(): List<DataSampleDto>
     suspend fun getImageClasses(): List<DatasetImageClass>
+    suspend fun generateDataset(): PathDto
 
     suspend fun getUserList(): List<UserDto>
     suspend fun deleteUser(id: Int): SuccessResultDto

@@ -21,6 +21,8 @@ import com.datum.client.types.show
 import com.datum.client.ui.custom.ActionSubmitAlert
 import com.datum.client.ui.custom.AlertConfiguration
 import com.datum.client.ui.custom.ProgressIndicator
+import com.datum.client.ui.page.archive_page.ArchivePage
+import com.datum.client.ui.page.archive_page.ArchivePageNavHelper
 import com.datum.client.ui.theme.DatumTheme
 import kotlinx.coroutines.runBlocking
 import com.datum.client.ui.page.dataset_control.DatasetControlNavHelper
@@ -147,6 +149,11 @@ class MainActivity : ComponentActivity() {
             val imageClass = ImageClassNavHelper()
             composable(imageClass.templateUrl(), arguments = imageClass.getNavArguments()){
                 ImageClassPage(navController, it).BuildContent()
+            }
+
+            val archivePage = ArchivePageNavHelper()
+            composable(archivePage.templateUrl(), arguments = archivePage.getNavArguments()){
+                ArchivePage(navController, it).BuildContent()
             }
         }
     }

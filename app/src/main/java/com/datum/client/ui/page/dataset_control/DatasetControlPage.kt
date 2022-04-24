@@ -15,13 +15,12 @@ import com.datum.client.ui.Page
 import com.datum.client.ui.custom.ManagementOption
 import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.custom.Separator
+import com.datum.client.ui.page.archive_page.ArchivePage
+import com.datum.client.ui.page.archive_page.ArchivePageNavHelper
 import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
 import com.datum.client.ui.page.dataset_meta.DatasetMetaPage
 import com.datum.client.ui.page.image_classes.ImageClassNavHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 class DatasetControlPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
@@ -54,7 +53,14 @@ class DatasetControlPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             }*/
             Separator(color = Color.Gray)
             ManagementOption(optionString = "Generate archive") {
-
+                CoroutineScope(Dispatchers.IO).launch {
+                    val path = ProgressIndicator.blockOperation {
+                        BusinessLogicService.instance.generateArchive()
+                    }
+                    withContext(Dispatchers.Main) {
+                        navController.navigate(ArchivePageNavHelper().substituteArgument(path))
+                    }
+                }
             }
         }
     }

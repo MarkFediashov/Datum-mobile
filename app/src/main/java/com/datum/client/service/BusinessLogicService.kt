@@ -121,5 +121,6 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
     suspend fun setMetadata(meta: DatasetDto<DatasetImageClassDto>) = apiService.setDatasetMetadata(meta)
     suspend fun updateMetadata(meta: DatasetDto<DatasetImageClassDto>) = apiService.updateDatasetMetadata(meta)
     suspend fun deleteMetadata() = apiService.deleteMetadata()
+    suspend fun generateArchive() = apiService.generateDataset()
 }
 

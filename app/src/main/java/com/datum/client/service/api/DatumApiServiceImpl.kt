@@ -95,6 +95,10 @@ class DatumApiServiceImpl : DatumApiService {
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.IMAGE_CLASSES, HttpMethod.Get, "")
     }
 
+    override suspend fun generateDataset(): PathDto {
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.ARCHIVE, HttpMethod.Post, "")
+    }
+
     override suspend fun getUserList(): List<UserDto> {
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.User.LIST, HttpMethod.Get, "")
     }
