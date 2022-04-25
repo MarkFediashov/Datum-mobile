@@ -23,6 +23,7 @@ import com.datum.client.service.BusinessLogicService
 import com.datum.client.service.Role
 import com.datum.client.types.show
 import com.datum.client.ui.Page
+import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.page.maintainer.MaintainerPageNavHelper
 import com.datum.client.ui.page.user.UserPageNavHelper
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +50,7 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             Box(Modifier.padding(top=20.dp))
             TextField(value = password.value, onValueChange = { password.value = it})
             Spacer(Modifier.weight(1f))
-            Button(onClick = { onClick(login.value, password.value, context, scope) }) {
+            Button(onClick = { onClick(login.value.trim(), password.value.trim(), context, scope) }) {
                 Text("Login")
             }
             Box(Modifier.padding(top=30.dp))
@@ -59,7 +60,9 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     private fun onClick(login: String, password: String, context: Context, scope: CoroutineScope) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val result = BusinessLogicService.instance.login(login, password)
+                val result = ProgressIndicator.blockOperation {
+                    BusinessLogicService.instance.login(login, password)
+                }
                 withContext(Dispatchers.Main) {
                     val message = if (result) "Success" else "Bad"
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()

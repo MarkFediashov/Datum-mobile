@@ -43,8 +43,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -63,12 +65,20 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
         val scrollState = rememberLazyListState()
         val showDeleteDialogState = remember { createAlertState() }
         val showAddUserDialogState = remember { mutableStateOf(false) }
-        val deleteUserRef = remember { mutableStateOf(argument.first()) }
+        val deleteUserRef = remember { mutableStateOf(argument.firstOrNull()) }
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
 
         AlertBinder(state = showDeleteDialogState) {
-            DeleteUserDialog(user = deleteUserRef.value, showAlert = it, scope = scope)
+            DeleteUserDialog(user = deleteUserRef.value!!, showAlert = it, scope = scope)
+        }
+
+        AlertBinder(showAddUserDialogState){
+            AddUserDialog(showAddUserDialogState) {
+                scope.launch {
+                    onUserCreate(it, context)
+                }
+            }
         }
 
         Scaffold(
@@ -79,14 +89,6 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
                     .fillMaxSize()
                     .padding(horizontal = 10.dp)) {
                     items(argument){
-
-                        if(showAddUserDialogState.value){
-                            AddUserDialog(showAddUserDialogState) {
-                                scope.launch {
-                                    onUserCreate(it, context)
-                                }
-                            }
-                        }
 
                         UserRow(it) {
                             showDeleteDialogState.value = true
@@ -128,7 +130,11 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
             ) {
                 Column {
                     Text(user.name, fontSize = 20.sp)
-                    Text(user.created)
+                    Text(
+                        DateTimeFormatter
+                            .ofLocalizedDateTime(FormatStyle.SHORT)
+                            .withLocale(Locale.UK)
+                            .format(LocalDateTime.parse(user.created)))
                 }
                 Text(Role.by(user.roleId).name, fontSize = 20.sp)
             }
@@ -185,10 +191,13 @@ class UserListPage(navController: NavController, backStackEntry: NavBackStackEnt
             title = { Text ("Add user") },
             text = {
                 Column() {
+                    Text("Name")
                     TextField(value = newUserName.value, onValueChange = assign(newUserName))
                     Box(Modifier.height(20.dp))
+                    Text("E-mail")
                     TextField(value = newUserEmail.value, onValueChange = assign(newUserEmail))
                     Box(Modifier.height(20.dp))
+                    Text("Role")
                     ComplexDropdownMenu(selectedClass = currentRole, options = Role.ROLES)
                 }
             },
