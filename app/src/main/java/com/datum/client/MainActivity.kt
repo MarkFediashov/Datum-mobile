@@ -27,8 +27,6 @@ import com.datum.client.ui.theme.DatumTheme
 import kotlinx.coroutines.runBlocking
 import com.datum.client.ui.page.dataset_control.DatasetControlNavHelper
 import com.datum.client.ui.page.dataset_control.DatasetControlPage
-import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
-import com.datum.client.ui.page.dataset_meta.DatasetMetaPage
 import com.datum.client.ui.page.domain_enter.DomainEnterNavHelper
 import com.datum.client.ui.page.domain_enter.DomainEnterPage
 import com.datum.client.ui.page.image_classes.ImageClassNavHelper
@@ -139,11 +137,6 @@ class MainActivity : ComponentActivity() {
             val datasetControl  = DatasetControlNavHelper()
             composable(datasetControl.templateUrl(), arguments = datasetControl.getNavArguments()){
                 DatasetControlPage(navController, it).BuildContent()
-            }
-
-            val datasetMeta  = DatasetMetaNavHelper()
-            composable(datasetMeta.templateUrl(), arguments = datasetMeta.getNavArguments()){
-                DatasetMetaPage(navController, it).BuildContent()
             }
 
             val imageClass = ImageClassNavHelper()

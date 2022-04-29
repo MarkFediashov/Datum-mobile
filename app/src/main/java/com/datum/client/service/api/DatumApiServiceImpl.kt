@@ -46,26 +46,13 @@ class DatumApiServiceImpl : DatumApiService {
         }
     }
 
-    override suspend fun getDatasetMetadata(): DatasetDto<DatasetImageClass> {
-        return try {
-            networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.GET_META, HttpMethod.Get, "")
-        }
-        catch (_: Exception){
-            return DatasetDto(null, null, null, null,null, emptyList())
-        }
+    override suspend fun setImageClasses(datasetMetadata: List<DatasetImageClassDto>) {
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.IMAGE_CLASSES, HttpMethod.Post, datasetMetadata)
     }
 
-    override suspend fun setDatasetMetadata(datasetMetadata: DatasetDto<DatasetImageClassDto>) {
-        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.POST_META, HttpMethod.Post, datasetMetadata)
-    }
-
-    override suspend fun updateDatasetMetadata(meta: DatasetDto<DatasetImageClassDto>) {
-        assert(meta.datasetImageClasses.isNullOrEmpty())
-        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.UPDATE_META, HttpMethod.Post, meta)
-    }
 
     override suspend fun deleteMetadata() {
-        networkClient.sendAndGetResponseBodyOfType<Any>(ApiPath.Dataset.DELETE_META, HttpMethod.Post, "")
+        networkClient.sendAndGetResponseBodyOfType<Any>(ApiPath.Dataset.CLEAR, HttpMethod.Post, "")
     }
 
     override suspend fun putSample(imageClassId: Int, image: ByteArray): SuccessResultDto? {
@@ -95,8 +82,8 @@ class DatumApiServiceImpl : DatumApiService {
         return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.IMAGE_CLASSES, HttpMethod.Get, "")
     }
 
-    override suspend fun generateDataset(): PathDto {
-        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.ARCHIVE, HttpMethod.Post, "")
+    override suspend fun generateDataset(percent: Int): PathDto {
+        return networkClient.sendAndGetResponseBodyOfType(ApiPath.Dataset.archive(percent), HttpMethod.Post, "")
     }
 
     override suspend fun getUserList(): List<UserDto> {

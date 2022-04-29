@@ -20,16 +20,17 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.datum.client.dto.DatasetImageClassDto
 import com.datum.client.repository.ArgumentRepository
+import com.datum.client.service.BusinessLogicService
 import com.datum.client.types.*
 import com.datum.client.ui.Page
+import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.custom.Separator
-import com.datum.client.ui.page.dataset_meta.DatasetMetaNavHelper
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.launch
 
 class ImageClassPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
     private fun getImageClassList(): List<DatasetImageClassDto>{
-        return ImageClassNavHelper().getList(backStackEntry) ?: mutableListOf()
+        return mutableListOf()
     }
 
     private val list = mutableStateListOf(*getImageClassList().toTypedArray())
@@ -64,7 +65,10 @@ class ImageClassPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
                     }
                 }
             }
-            Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp)) {
+            Box(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 20.dp)) {
                 SaveButton()
             }
         }
@@ -119,11 +123,13 @@ class ImageClassPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
     @Composable
     private fun SaveButton() {
+        val scope = rememberCoroutineScope()
         val list = remember { list }
         Button(onClick = {
-            navController.previousBackStackEntry?.apply {
-                val refId = ArgumentRepository.putArgument(list.toList())
-                arguments!!.putInt(DatasetMetaNavHelper.CLASS_LIST_ARG, refId)
+            scope.launch {
+                ProgressIndicator.blockOperation {
+                    BusinessLogicService.instance.addClasses(list.toList())
+                }
                 navController.popBackStack()
             }
         }, enabled = list.isNotEmpty()){

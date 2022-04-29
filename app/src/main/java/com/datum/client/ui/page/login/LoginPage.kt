@@ -21,8 +21,10 @@ import com.datum.client.DatasetNotInitializedException
 import com.datum.client.MainActivity
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.service.Role
-import com.datum.client.types.show
+import com.datum.client.types.*
 import com.datum.client.ui.Page
+import com.datum.client.ui.custom.ActionSubmitAlert
+import com.datum.client.ui.custom.AlertConfiguration
 import com.datum.client.ui.custom.ProgressIndicator
 import com.datum.client.ui.page.maintainer.MaintainerPageNavHelper
 import com.datum.client.ui.page.user.UserPageNavHelper
@@ -33,6 +35,7 @@ import kotlinx.coroutines.withContext
 
 class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
+    var stringProxy: String? = null
 
     @ExperimentalMaterialApi
     @Composable
@@ -41,6 +44,11 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
         val login = remember { mutableStateOf("") }
         val password = remember { mutableStateOf("") }
         val scope = rememberCoroutineScope()
+        val error = createAlertState()
+
+        AlertBinder(state = error) {
+            ActionSubmitAlert(state = it, config = AlertConfiguration("ERROR", "Error : $stringProxy", onOk = it::hide, onCancel = it::hide))
+        }
 
         Column(modifier = Modifier
             .fillMaxHeight()
@@ -50,14 +58,14 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             Box(Modifier.padding(top=20.dp))
             TextField(value = password.value, onValueChange = { password.value = it})
             Spacer(Modifier.weight(1f))
-            Button(onClick = { onClick(login.value.trim(), password.value.trim(), context, scope) }) {
+            Button(onClick = { onClick(login.value.trim(), password.value.trim(), context, scope, error) }) {
                 Text("Login")
             }
             Box(Modifier.padding(top=30.dp))
         }
     }
 
-    private fun onClick(login: String, password: String, context: Context, scope: CoroutineScope) {
+    private fun onClick(login: String, password: String, context: Context, scope: CoroutineScope, alertState: AlertState) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val result = ProgressIndicator.blockOperation {
@@ -68,6 +76,7 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     if (result) {
                         val role = BusinessLogicService.instance.getUserRole()
+                        navController.popBackStack()
                         if (Role.isUser(role)) {
                             navController.navigate(UserPageNavHelper().substituteArgument())
                         } else {
@@ -78,6 +87,11 @@ class LoginPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
             } catch (e: DatasetNotInitializedException) {
                 scope.launch {
                     MainActivity.state.show()
+                }
+            } catch (e: Exception){
+                scope.launch {
+                    stringProxy = e.message + e.stackTraceToString()
+                    alertState.show()
                 }
             }
         }

@@ -18,13 +18,16 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
 
     companion object {
         lateinit var instance: BusinessLogicService
-
+        var created = false
         fun setup(context: Context){
-            instance =  BusinessLogicService(SettingsRepositoryImpl(context))
-            instance.apply {
-                if(hasDomain()){
-                    apiService.setDomain(settingsRepository.endpoint!!)
+            if(!created) {
+                instance = BusinessLogicService(SettingsRepositoryImpl(context))
+                instance.apply {
+                    if (hasDomain()) {
+                        apiService.setDomain(settingsRepository.endpoint!!)
+                    }
                 }
+                created = true
             }
         }
     }
@@ -59,7 +62,7 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
         } catch (e: DatasetNotInitializedException){
             throw e
         } catch (e: Exception) {
-            false
+            throw e
         }
     }
 
@@ -90,7 +93,6 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
 
     suspend fun uploadImage(id: Int, image: ByteArray) = apiService.putSample(id, image)?.success ?: false
 
-    suspend fun getDatasetMeta() = apiService.getDatasetMetadata()
 
     suspend fun getUserList() = apiService.getUserList()
 
@@ -118,9 +120,8 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
         }
     }
 
-    suspend fun setMetadata(meta: DatasetDto<DatasetImageClassDto>) = apiService.setDatasetMetadata(meta)
-    suspend fun updateMetadata(meta: DatasetDto<DatasetImageClassDto>) = apiService.updateDatasetMetadata(meta)
     suspend fun deleteMetadata() = apiService.deleteMetadata()
-    suspend fun generateArchive() = apiService.generateDataset()
+    suspend fun generateArchive(percent: Int) = apiService.generateDataset(percent)
+    suspend fun addClasses(classes: List<DatasetImageClassDto>) = apiService.setImageClasses(classes)
 }
 

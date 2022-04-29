@@ -11,32 +11,20 @@ import kotlin.reflect.KClass
 
 class ImageClassNavHelper: NavHelper() {
 
-    private val ID = "id"
 
     override fun getNavArguments(): List<NamedNavArgument> {
-        return listOf(
-            navArgument(ID) {
-                type = NavType.IntType
-                nullable = false
-                defaultValue = -1
-            }
-        )
+        return emptyList()
     }
 
     override fun templateUrl(): String {
-        return "image-classes?$ID={$ID}"
+        return "image-classes"
     }
 
     override fun substituteArgument(vararg arr: Any): String {
-        val id = ArgumentRepository.putArgument(arr[0] as List<DatasetImageClassDto>)
-        return "image-classes?$ID=$id"
+        return "image-classes"
     }
 
     override fun typeOf(): KClass<*> {
         return ImageClassPage::class
-    }
-
-    fun getList(b: NavBackStackEntry): List<DatasetImageClassDto>? {
-        return ArgumentRepository.getArgument(getArg<Int>(b, ID) ?: -1)
     }
 }

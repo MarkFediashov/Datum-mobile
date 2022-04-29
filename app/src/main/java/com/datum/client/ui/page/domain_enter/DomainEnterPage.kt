@@ -60,6 +60,7 @@ class DomainEnterPage(navController: NavController, stackEntry: NavBackStackEntr
                 withContext(Dispatchers.Main) {
                     val message = if (data) "Server exist" else "Server non exist"
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
                     navController.navigate(LoginPageNavHelper().substituteArgument())
                 }
             }
