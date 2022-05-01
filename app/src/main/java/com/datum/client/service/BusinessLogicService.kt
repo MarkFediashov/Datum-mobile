@@ -91,6 +91,8 @@ class BusinessLogicService(private val settingsRepository: SettingsRepository,
 
     fun getImageClasses() = imageClassesCache
 
+    suspend fun getActualImageClasses() = apiService.getImageClasses()
+
     suspend fun uploadImage(id: Int, image: ByteArray) = apiService.putSample(id, image)?.success ?: false
 
 

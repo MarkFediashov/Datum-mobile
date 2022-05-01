@@ -5,10 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.datum.client.types.NamedEntity
 
-interface DropdownMenuEntity{
+interface DropdownMenuEntity: NamedEntity{
     val id: Int
-    val name: String
 }
 
 @ExperimentalMaterialApi

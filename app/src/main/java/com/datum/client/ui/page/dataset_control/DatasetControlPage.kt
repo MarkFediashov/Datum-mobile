@@ -1,25 +1,19 @@
 package com.datum.client.ui.page.dataset_control
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.datum.client.dto.DatasetImageClassDto
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.types.*
 import com.datum.client.ui.Page
 import com.datum.client.ui.custom.*
-import com.datum.client.ui.page.archive_page.ArchivePage
 import com.datum.client.ui.page.archive_page.ArchivePageNavHelper
 import com.datum.client.ui.page.image_classes.ImageClassNavHelper
 import kotlinx.coroutines.*
@@ -38,14 +32,17 @@ class DatasetControlPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
         }
 
         AlertBinder(state = archiveState) {
-            ArchiveAlert(state = it)
+            ArchiveAlert(state = it, scope = scope)
         }
 
         Column {
             Text(text = "Dataset control", fontSize = 24.sp)
             ManagementOption(optionString = "Dataset image classes") {
                 scope.launch {
-                    navController.navigate(ImageClassNavHelper().substituteArgument())
+                    val existedClasses = ProgressIndicator.blockOperation {
+                        BusinessLogicService.instance.getActualImageClasses()
+                    }
+                    navController.navigate(ImageClassNavHelper().substituteArgument(existedClasses))
                 }
 
             }
@@ -86,15 +83,27 @@ class DatasetControlPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     }
 
     @Composable
-    private fun ArchiveAlert(state: AlertState){
-        val data = remember { mutableStateOf(100) }
+    private fun ArchiveAlert(state: AlertState, scope: CoroutineScope){
+        val percent = remember { mutableStateOf(100) }
         AlertDialog(onDismissRequest = state::hide,
             title = { Text("Archive percent") },
             text = {
-                IntegerSlider(data)
+                IntegerSlider(percent)
             },
             buttons = {
-                TextButton(onClick = { /*TODO*/ }) {
+                TextButton(onClick = {
+                    scope.launch {
+                        state.hide()
+                        val path = withContext(Dispatchers.IO) {
+                            ProgressIndicator.blockOperation {
+                                BusinessLogicService.instance.generateArchive(percent.value)
+                            }
+                        }
+
+                        navController.navigate(ArchivePageNavHelper().substituteArgument(path))
+
+                    }
+                }) {
                     Text("Generate")
                 }
             }

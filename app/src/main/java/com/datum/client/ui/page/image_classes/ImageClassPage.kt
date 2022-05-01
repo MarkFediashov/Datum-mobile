@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,8 +17,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.datum.client.dto.DatasetImageClass
 import com.datum.client.dto.DatasetImageClassDto
-import com.datum.client.repository.ArgumentRepository
 import com.datum.client.service.BusinessLogicService
 import com.datum.client.types.*
 import com.datum.client.ui.Page
@@ -29,22 +28,40 @@ import kotlinx.coroutines.launch
 
 class ImageClassPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
 
-    private fun getImageClassList(): List<DatasetImageClassDto>{
-        return mutableListOf()
+    private fun getExistedClassList(): List<DatasetImageClass>{
+        return ImageClassNavHelper().getExistedClasses(backStackEntry)
     }
 
-    private val list = mutableStateListOf(*getImageClassList().toTypedArray())
+    private val existedClasses = mutableStateListOf(*getExistedClassList().toTypedArray())
+    private val list = mutableStateListOf<DatasetImageClassDto>()
+
+    companion object{
+        @Composable
+        fun <T: NamedEntity> BuildSeparatedList(list: MutableList<T>, itemComposableBuilder: @Composable (arg: T) -> Unit){
+            LazyColumn {
+                items(list) {
+                    key(it.name) {
+                        itemComposableBuilder(arg = it)
+                        if (list.last() != it) {
+                            Separator(color = Color.Gray)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
-        val list = remember { list }
-        val edit = remember { list.isNullOrEmpty() }
+        val newList = remember { list }
+        val oldList = remember { getExistedClassList().toMutableList() }
+        val edit = remember { newList.isNullOrEmpty() }
 
         val state = remember { createAlertState() }
 
         AlertBinder(state = state) {
-            AddClassAlert(state = it, list)
+            AddClassAlert(state = it, newList)
         }
 
         Box {
@@ -52,14 +69,18 @@ class ImageClassPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
                 if (edit)
                     AddButton(state)
             }) {
-                LazyColumn {
-                    items(list) {
-                        key(it.name) {
-                            BuildRow(imageClassDto = it) {
-                                list.remove(it)
-                            }
-                            if (list.last() != it) {
-                                Separator(color = Color.Gray)
+                Column(Modifier.fillMaxSize()) {
+                    Text("Old classes")
+                    Box(Modifier.weight(0.5f)){
+                        BuildSeparatedList(list = oldList) { arg ->
+                            BuildRow(imageClassDto = arg)
+                        }
+                    }
+                    Text("New classes")
+                    Box(Modifier.weight(0.5f)){
+                        BuildSeparatedList(list = newList) { arg ->
+                            BuildRow(imageClassDto = arg) {
+                                newList.remove(arg)
                             }
                         }
                     }
@@ -75,14 +96,17 @@ class ImageClassPage(n: NavController, b: NavBackStackEntry): Page(n, b) {
     }
 
     @Composable
-    private fun BuildRow(imageClassDto: DatasetImageClassDto, onDelete: () -> Unit){
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,verticalAlignment = Alignment.CenterVertically){
+    private fun BuildRow(imageClassDto: NamedEntity, onDelete: (() -> Unit)? = null){
+        Row(modifier = Modifier.fillMaxWidth().height(50.dp), horizontalArrangement = Arrangement.SpaceBetween,verticalAlignment = Alignment.CenterVertically){
             Text(imageClassDto.name, modifier = Modifier.padding(start = 10.dp), fontSize = 18.sp)
-            IconButton(onClick = {
-                onDelete()
-            }) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+            onDelete?.let {
+                IconButton(onClick = {
+                    it()
+                }) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                }
             }
+
         }
     }
 

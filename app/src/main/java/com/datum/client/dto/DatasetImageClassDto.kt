@@ -1,3 +1,5 @@
 package com.datum.client.dto
 
-data class DatasetImageClassDto(val name: String, val description: String)
+import com.datum.client.types.NamedEntity
+
+data class DatasetImageClassDto(override val name: String, val description: String) : NamedEntity

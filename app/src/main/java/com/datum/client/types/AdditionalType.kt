@@ -24,3 +24,7 @@ fun AlertBinder(state: AlertState, AlertBuilder: @Composable (state: AlertState)
         AlertBuilder(state)
     }
 }
+
+interface NamedEntity{
+    val name: String
+}
